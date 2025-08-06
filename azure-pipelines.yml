@@ -1,0 +1,50 @@
+trigger:
+- none
+
+pool:
+  DevOps-Poool
+
+variables:
+  workingDirectory: 'environment/dev'
+  serviceconnection: Service Connection
+
+steps:
+- task: TerraformInstaller@1
+  displayName: Terraform Installer
+  inputs:
+   terraformVersion: latest
+
+- task: TerraformTask@5
+  displayName: Terraform init
+  inputs:
+    provider: 'azurerm'
+    command: 'init'
+    workingDirectory: '$(workingDirectory)'
+    backendServiceArm: '$(serviceconnection)'
+    backendAzureRmResourceGroupName: 'rg-demon-slayer'
+    backendAzureRmStorageAccountName: 'demonstorageacc'
+    backendAzureRmContainerName: 'demoncontainer'
+    backendAzureRmKey: 'bhavya.tfstate'
+
+- task: TerraformTask@5
+  displayName: Terraform Validate
+  inputs:
+    provider: 'azurerm'
+    command: 'validate'
+    workingDirectory: '$(workingDirectory)'
+
+- task: TerraformTask@5
+  displayName: Terraform Plan
+  inputs:
+    provider: 'azurerm'
+    command: 'plan'
+    workingDirectory: '$(workingDirectory)'
+    environmentServiceNameAzureRM: '$(serviceconnection)'
+
+- task: TerraformTask@5
+  displayName: Terraform Apply
+  inputs:
+    provider: 'azurerm'
+    command: 'apply'
+    workingDirectory: '$(workingDirectory)'
+    environmentServiceNameAzureRM: '$(serviceconnection)'
