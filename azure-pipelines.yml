@@ -1,12 +1,32 @@
 trigger:
 - none
 
-pool:
+pool: 
   DevOps-Poool
 
-variables:
-  workingDirectory: 'environment/dev'
-  serviceconnection: Service Connection
+variables: 
+  workingDirectory: environment/dev
+
+parameters:
+- name: RunInit
+  type: boolean
+  default: true
+
+- name: RunFmt
+  type: boolean
+  default: true
+
+- name: RunValidate
+  type: boolean
+  default: true
+
+- name: RunPlan
+  type: boolean
+  default: true
+
+- name: RunApply
+  type: boolean
+  default: true
 
 steps:
 - task: TerraformInstaller@1
@@ -15,19 +35,31 @@ steps:
    terraformVersion: latest
 
 - task: TerraformTask@5
-  displayName: Terraform init
+  displayName: Terraform Init
+  condition: eq('${{ parameters.RunInit }}', true)
   inputs:
     provider: 'azurerm'
     command: 'init'
     workingDirectory: '$(workingDirectory)'
-    backendServiceArm: '$(serviceconnection)'
+    backendServiceArm: 'Service Connection'
     backendAzureRmResourceGroupName: 'rg-demon-slayer'
     backendAzureRmStorageAccountName: 'demonstorageacc'
     backendAzureRmContainerName: 'demoncontainer'
-    backendAzureRmKey: 'bhavya.tfstate'
+
+- task: TerraformTask@5
+  displayName: Terraform Fmt
+  condition: eq('${{ parameters.RunFmt }}', true)
+  inputs:
+    provider: 'azurerm'
+    command: 'custom'
+    workingDirectory: '$(workingDirectory)'
+    outputTo: 'console'
+    customCommand: 'fmt'
+    environmentServiceNameAzureRM: 'Service Connection'
 
 - task: TerraformTask@5
   displayName: Terraform Validate
+  condition: eq('${{ parameters.RunValidate }}', true)
   inputs:
     provider: 'azurerm'
     command: 'validate'
@@ -35,16 +67,18 @@ steps:
 
 - task: TerraformTask@5
   displayName: Terraform Plan
+  condition: eq('${{ parameters.RunPlan }}', true)
   inputs:
     provider: 'azurerm'
     command: 'plan'
     workingDirectory: '$(workingDirectory)'
-    environmentServiceNameAzureRM: '$(serviceconnection)'
+    environmentServiceNameAzureRM: 'Service Connection'
 
 - task: TerraformTask@5
   displayName: Terraform Apply
+  condition: eq('${{ parameters.RunApply }}', true)
   inputs:
     provider: 'azurerm'
     command: 'apply'
     workingDirectory: '$(workingDirectory)'
-    environmentServiceNameAzureRM: '$(serviceconnection)'
+    environmentServiceNameAzureRM: 'Service Connection'
