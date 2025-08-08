@@ -45,6 +45,7 @@ steps:
     backendAzureRmResourceGroupName: 'rg-demon-slayer'
     backendAzureRmStorageAccountName: 'demonstorageacc'
     backendAzureRmContainerName: 'demoncontainer'
+    backendAzureRmKey: 'bhavya.tfstate'
 
 - task: TerraformTask@5
   displayName: Terraform Fmt
